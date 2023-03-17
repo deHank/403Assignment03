@@ -1,5 +1,7 @@
 #include "Tokenizer.h"
+#include "Givens.h"
 #include <string.h>
+#include <stdio.h>
 
 //*inf is already open
 //*I need to modify int numLex
@@ -9,18 +11,21 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
         printf("Failed to open file\n");
         return 1;
     }
+    numLex = 0;
     char *lexic;
     char line[256];
+    char *word;
     while (fgets(line, 256, inf) != NULL) {
         int size = strlen(line);
-        int start = 0;
         int end = 0;
         int longestMatch = 0;
         while (end < size){
             int matchLength = 0;
-            for(int i = 0; i < 13; i++){
                 matchLength = findLongestCommonSubstring(line);
-            }
+		numLex++;
+		end += matchLength;
+		printf("end is %d", end);
+		printf("\n",word);
         }
         }
 
@@ -28,8 +33,26 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
     return 0;
 }
 
-int findLongestCommonSubstring(const char *str){
-    return 1;
+int findLongestCommonSubstring(char *str){
+  printf("length of string is %d", strlen(str));
+  int size = strlen(str);
+  int i = 0;
+  
+
+  for(i = 0; i < strlen(str); i++){
+    char* test = str[i];
+    _Bool isWord = validIdentifier(&test);
+    _Bool isNum = validNumber(&str[i]);
+    if(isWord){
+      printf("yes!");
+    }
+    else{
+      return i+1;
+    }
+    printf("test is %s", &test);
+  }
+  
+  return i+1;
 }
 
 
