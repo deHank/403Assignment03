@@ -20,9 +20,18 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
         int end = 0;
         int start = 0;
         while (end < size){
+          while (isspace(line[end])) {
+          end++;
+          start++;
+        }
           int matchLength = 0;
           matchLength = findLongestCommonSubstring(line, start);
           strncpy(word, &line[start], matchLength);
+          if(strcmp(word, "")==0){
+            end++;
+            start++;
+            continue;
+          }
           printf("match length is %d\n", matchLength);
 		  (*numLex)++;
 		  end = matchLength + end;
@@ -31,8 +40,12 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
 		  printf("word is %s\n", word);
 
 
-          struct lexics lexeme = lexemmeGenerator(word, numLex);
-          aLex[*numLex - 1] = lexeme;
+            struct lexics lexeme = lexemmeGenerator(word, numLex);
+            aLex[*numLex - 1] = lexeme;
+          if(strcmp(word, "")==0){
+            end++;
+            start++;
+          }
           memset(word, 0, sizeof(word));
         }
         }
@@ -40,6 +53,7 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
     //fclose(inf);
     return 0;
 }
+
 
 struct lexics lexemmeGenerator(char *str, int *numLex) {
     struct lexics lexemme;
@@ -67,48 +81,65 @@ struct lexics lexemmeGenerator(char *str, int *numLex) {
         lexemme.token = 8;
     }
     else if (strcmp(str, "+") == 0 || strcmp(str, "*") == 0 || strcmp(str, "!") == 0) {
-        lexemme.token = 9;
+        lexemme.token = BINOP;
     }
     else if (strcmp(str, "%") == 0) {
         lexemme.token = BINOP;
     }
-    else {
-        printf("%s : Did not match any case.\n", str);
+    else if (strcmp(str, "while") == 0) {
+        lexemme.token = 4;
+    }
+    else if (strcmp(str, "return") == 0) {
+        lexemme.token = 5;
+    }
+    else if (strcmp(str, "int") == 0 || strcmp(str, "void")==0) {
+        lexemme.token = 9;
+    }
+    else if (validIdentifier(str)){
+        lexemme.token = 10;
+    }
+    else if (validNumber(str)){
+        lexemme.token = 12;
     }
    return lexemme;
 }
 
 
 int findLongestCommonSubstring(char *str, int start){
-  //printf("length of string is %d \n", strlen(str));
-  int size = strlen(str);
-  int i = start;
-  int length = 1;
-  char prev = '\0';
+    int size = strlen(str);
+    int i = start;
+    int length = 1;
+    char prev = '\0';
+    char* lastMatch = NULL;
 
-  for(i = start+1; i < strlen(str); i++){
-    char* test = str[i];
-    char curr = str[i];
-    char test1[3] = {prev, curr, '\0'};
-    _Bool isWord = validIdentifier(&test);
-    _Bool isNum = validNumber(&str[i]);
-    if(strcmp(test1, "==") == 0) {  // check for '=='
-      length++;
-      i++;  // skip the second '=' character
+    for(i = start+1; i < strlen(str); i++){
+        char curr = str[i];
+        char subStr[i-start+2];
+        strncpy(subStr, &str[start], i-start+1);
+        subStr[i-start+1] = '\0';
+        _Bool isWord = validIdentifier(subStr);
+        _Bool isNum = validNumber(subStr);
+
+        if(lastMatch != NULL && strlen(lastMatch) == 1){
+            char test[3] = {lastMatch[0], curr, '\0'};
+            if(strcmp(test, "==") == 0 || strcmp(test, "!=") == 0 ) {
+                length++;
+                lastMatch = test;
+                continue;
+            }
+        }
+       if(isWord || isNum){
+            length++;
+            lastMatch = subStr;
+        }
+        else{
+            return length;
+        }
     }
-    else if(isWord){
-      printf("yes! TEST IS%s", &test);
-        length++;
-      }
-    else{
-      printf("no! test is %s", &test);
-      return length;
-    }
-    //printf("test is %s", &test);
-  }
-  
-  return length;
+
+    return length;
 }
+
 
 
 
