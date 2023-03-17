@@ -1,4 +1,0 @@
-int gcd(int a1){
-	a1 = 10;
-	return;
-}

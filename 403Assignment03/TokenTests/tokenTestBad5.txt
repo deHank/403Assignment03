@@ -1,3 +1,0 @@
-int gcd(int a2){
-	()
-}
