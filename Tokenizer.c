@@ -11,21 +11,25 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
         printf("Failed to open file\n");
         return 1;
     }
-    numLex = 0;
+    *numLex = 0;
     char *lexic;
     char line[256];
-    char *word;
+    char word[256];
     while (fgets(line, 256, inf) != NULL) {
         int size = strlen(line);
         int end = 0;
-        int longestMatch = 0;
+        int start = 0;
         while (end < size){
-            int matchLength = 0;
-                matchLength = findLongestCommonSubstring(line);
-		numLex++;
-		end += matchLength;
-		printf("end is %d", end);
-		printf("\n",word);
+          int matchLength = 0;
+          matchLength = findLongestCommonSubstring(line, start);
+          strncpy(word, &line[start], matchLength);
+          printf("match length is %d\n", matchLength);
+		  (*numLex)++;
+		  end = matchLength + end;
+          start = end;
+		  printf("end is %d", end);
+		  printf("word is %s\n", word);
+          memset(word, 0, sizeof(word));
         }
         }
 
@@ -33,26 +37,29 @@ _Bool tokenizer(struct lexics *aLex, int *numLex, FILE *inf){
     return 0;
 }
 
-int findLongestCommonSubstring(char *str){
-  printf("length of string is %d", strlen(str));
+int findLongestCommonSubstring(char *str, int start){
+  //printf("length of string is %d \n", strlen(str));
   int size = strlen(str);
-  int i = 0;
+  int i = start;
+  int length = 1;
   
 
-  for(i = 0; i < strlen(str); i++){
+  for(i = start+1; i < strlen(str); i++){
     char* test = str[i];
     _Bool isWord = validIdentifier(&test);
     _Bool isNum = validNumber(&str[i]);
     if(isWord){
-      printf("yes!");
-    }
+      printf("yes! TEST IS%s", &test);
+        length++;
+      }
     else{
-      return i+1;
+      printf("no! test is %s", &test);
+      return length;
     }
-    printf("test is %s", &test);
+    //printf("test is %s", &test);
   }
   
-  return i+1;
+  return length;
 }
 
 
