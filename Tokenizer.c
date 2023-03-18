@@ -80,7 +80,7 @@ struct lexics lexemmeGenerator(char *str, int *numLex) {
     else if (strcmp(str, ";") == 0) {
         lexemme.token = 8;
     }
-    else if (strcmp(str, "+") == 0 || strcmp(str, "*") == 0 || strcmp(str, "!") == 0) {
+    else if (strcmp(str, "+") == 0 || strcmp(str, "*") == 0 || strcmp(str, "!") == 0|| strcmp(str, "!=") == 0|| strcmp(str, "==") == 0) {
         lexemme.token = BINOP;
     }
     else if (strcmp(str, "%") == 0) {
@@ -109,32 +109,42 @@ int findLongestCommonSubstring(char *str, int start){
     int size = strlen(str);
     int i = start;
     int length = 1;
-    char prev = '\0';
-    char* lastMatch = NULL;
+
+    char lastMatch[3] = {'\0'};
 
     for(i = start+1; i < strlen(str); i++){
         char curr = str[i];
+        char prev = str[start];
         char subStr[i-start+2];
         strncpy(subStr, &str[start], i-start+1);
         subStr[i-start+1] = '\0';
-        _Bool isWord = validIdentifier(subStr);
-        _Bool isNum = validNumber(subStr);
 
-        if(lastMatch != NULL && strlen(lastMatch) == 1){
+
+        if(lastMatch[0] != '\0' && strlen(lastMatch) == 1){
             char test[3] = {lastMatch[0], curr, '\0'};
             if(strcmp(test, "==") == 0 || strcmp(test, "!=") == 0 ) {
                 length++;
-                lastMatch = test;
+                strcpy(lastMatch, test);
                 continue;
             }
         }
-       if(isWord || isNum){
+        if ((curr == '=' && prev == '=' ) || (curr == '=' && prev =='!')) {
             length++;
-            lastMatch = subStr;
+            prev = curr;
+            continue;
+        }
+
+        _Bool isWord = validIdentifier(subStr);
+        _Bool isNum = validNumber(subStr);
+         if(isWord || isNum){
+            length++;
+            strcpy(lastMatch, subStr);
         }
         else{
             return length;
         }
+
+    prev = curr;
     }
 
     return length;
